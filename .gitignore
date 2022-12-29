@@ -1,0 +1,6 @@
+Debug/
+Dev/
+
+*.launch
+compile_commands.json
+tags
