@@ -52,7 +52,7 @@ static uint32_t defer_tick_update_count = 0;
 
 // compare function for task
 // assume that e1 and e2 points to SchedTask_t
-__weak uint8_t Custom_SchedTask_Compare_Smaller(void *task1, void *task2)
+__weak uint8_t Logical_SchedTask_Compare_Smaller(void *task1, void *task2)
 {
     SchedTask_t *elem1 = (SchedTask_t*) task1;
     SchedTask_t *elem2 = (SchedTask_t*) task2;
@@ -101,15 +101,15 @@ void Logical_Scheduler_Init(void)
     defer_tick_update_count = 0;
 
     Logical_PQueue_Create(bin_heap, CUSTOM_SCHEDULER_BIHEAP_SIZE, sizeof(SchedTask_t),
-            task_count, Custom_SchedTask_Compare_Smaller);
+            task_count, Logical_SchedTask_Compare_Smaller);
 
     // init timer and watchdog
 #ifdef CUSTOM_SCHEDULER_USE_WATCHDOG
     MX_IWDG_Init(); // defined by CubeMx in iwdg.c
 #endif
 
-    MX_TIM3_Init(); // defined by CubeMx in tim.c
-    HAL_TIM_Base_Start_IT(&htim3);
+    MX_TIM2_Init(); // defined by CubeMx in tim.c
+    HAL_TIM_Base_Start_IT(&htim2);
 }
 
 void Logical_Scheduler_Update(void)
@@ -155,7 +155,7 @@ void Logical_Scheduler_Add(SchedTask_Func_t pTask, void *pArg,
         };
 
         Logical_PQueue_Insert(bin_heap, CUSTOM_SCHEDULER_BIHEAP_SIZE, sizeof(SchedTask_t), task_count,
-                &new_task, Custom_SchedTask_Compare_Smaller);
+                &new_task, Logical_SchedTask_Compare_Smaller);
 
         increment_timestamp(&new_task.runAtTick, delay);
     }
@@ -188,7 +188,7 @@ void Logical_Scheduler_Delete(uint8_t ID)
         {
             // found the task, delete it from heap
             Logical_PQueue_Delete(bin_heap, CUSTOM_SCHEDULER_BIHEAP_SIZE, sizeof(SchedTask_t),
-                    task_count, i, Custom_SchedTask_Compare_Smaller);
+                    task_count, i, Logical_SchedTask_Compare_Smaller);
             task_count--;
             return;
         }
@@ -225,7 +225,7 @@ void Logical_Scheduler_Dispatch()
         {
             // delete the task
             Logical_PQueue_Pop(bin_heap, CUSTOM_SCHEDULER_BIHEAP_SIZE, sizeof(SchedTask_t),
-                    task_count, Custom_SchedTask_Compare_Smaller);
+                    task_count, Logical_SchedTask_Compare_Smaller);
             task_count--;
         }
         else
@@ -233,7 +233,7 @@ void Logical_Scheduler_Dispatch()
             // if not reload the task and push it down the heap
             increment_timestamp(&top->runAtTick, top->periodTick);
             Logical_PQueue_PushDown(bin_heap, sizeof(SchedTask_t),
-                    task_count, Custom_SchedTask_Compare_Smaller);
+                    task_count, Logical_SchedTask_Compare_Smaller);
         }
     }
     defer_tick_update = 0;

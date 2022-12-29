@@ -89,11 +89,11 @@
 //
 // NOTE: must return true (1) if task1 < task2 to create a max heap in which
 // task2 ranks higher than task1
-uint8_t Custom_SchedTask_Compare_Smaller(void* task1, void *task2);
+uint8_t Logical_SchedTask_Compare_Smaller(void* task1, void *task2);
 
 // time conversion macro
 // turn from time duration in ms to number of tick
-#define CUSTOM_SCHEDULER_MS_TO_TICK(ms) (ms / CUSTOM_SCHEDULER_TICK_DURATION_MS)
+#define MS_TO_SCHEDTICK(ms) (ms / CUSTOM_SCHEDULER_TICK_DURATION_MS)
 
 
 
