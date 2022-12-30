@@ -48,7 +48,7 @@ static uint8_t task_is_running = 0;
 // if we need to defer interrupt for updating system_tick_count
 static uint8_t defer_tick_update = 0;
 // if number of tick deferred
-static uint32_t defer_tick_update_count = 0;
+static uint32_t volatile defer_tick_update_count = 0;
 
 // compare function for task
 // assume that e1 and e2 points to SchedTask_t
@@ -204,9 +204,14 @@ void Logical_Scheduler_Dispatch()
         return;
     }
 
+    if (defer_tick_update_count > 0)
+    {
+        increment_timestamp(&system_tick_count, defer_tick_update_count);
+        defer_tick_update_count = 0;
+    }
+    defer_tick_update = 1; // start of critical section
     // search the top of binary heap
     // if found task that is overdue, run it and update task record
-    defer_tick_update = 1; // start of critical section
     SchedTask_t *top = &bin_heap[0];
     while (task_count > 0 && top->runAtTick < system_tick_count)
     {
@@ -236,7 +241,7 @@ void Logical_Scheduler_Dispatch()
                     task_count, Logical_SchedTask_Compare_Smaller);
         }
     }
-    defer_tick_update = 0;
+    defer_tick_update = 0; // end of critical section
     if (defer_tick_update_count > 0)
     {
         increment_timestamp(&system_tick_count, defer_tick_update_count);
@@ -253,9 +258,12 @@ static inline void increment_timestamp(uint32_t volatile *ts, uint32_t amount)
     uint32_t limit = UINT32_MAX - amount;
     if (*ts > limit)
     {
-        fix_all_timestamp_overflow();
+        defer_tick_update_count += amount;
     }
-    *ts += amount;
+    else
+    {
+        *ts += amount;
+    }
 }
 
 // fix timestamp for all task (runAtTick) and system_tick_count when overflow occur

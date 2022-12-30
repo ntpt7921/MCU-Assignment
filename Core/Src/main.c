@@ -24,8 +24,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "Logical/global_object.h"
 #include "Logical/scheduler.h"
-#include "Hardware/buzzer.h"
+#include "Logical/fsm.h"
+#include "SchedTask/tasks.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,20 +58,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-Buzzer_t buzzer =
-{
-    .state = BUZZER_OFF,
-};
-void blink_task(void *param)
-{
-    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-    return;
-}
-
-void pwm_task(void *param)
-{
-    Hardware_Buzzer_Toggle(&buzzer);
-}
 
 /* USER CODE END 0 */
 
@@ -105,8 +93,11 @@ int main(void)
     MX_TIM2_Init();
     /* USER CODE BEGIN 2 */
     Hardware_Buzzer_Init();
-    Logical_Scheduler_Add(blink_task, NULL, 0, MS_TO_SCHEDTICK(500), 0, 0);
-    Logical_Scheduler_Add(pwm_task, NULL, 0, MS_TO_SCHEDTICK(1000), 0, 1);
+    Logical_Scheduler_Add(update_button_task, NULL, 0, 1, 0,
+            UPDATE_BUTTON_TASK_ID);
+    Logical_Scheduler_Add(run_fsm_task, &fsm, 0, 1, 0, RUN_FSM_TASK_ID);
+    Logical_Scheduler_Add(one_second_timer_task, NULL, 0, MS_TO_SCHEDTICK(1000),
+            0, ONE_SECOND_TIMER_TASK_ID);
     Logical_Scheduler_Init();
     /* USER CODE END 2 */
 

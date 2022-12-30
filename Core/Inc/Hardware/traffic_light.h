@@ -22,7 +22,7 @@ typedef enum
 typedef struct
 {
     TrafficLightColor_t current_color;
-    GPIO_TypeDef *port;
+    GPIO_TypeDef *port[2];
     uint16_t pin[2];
 
 } TrafficLight_t;

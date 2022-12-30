@@ -8,14 +8,14 @@
 #ifndef INC_FSM_H_
 #define INC_FSM_H_
 
-#include <Logical/fsm_state_list.h>
 #include "main.h"
+#include <Logical/fsm_state_list.h>
 
 /**
  * NOTE:
  * The finite state machine (FSM) module is written for general use by user
  *
- * FSM will be represented by a struct, containing the current state and 3 fucntion pointer:
+ * FSM will be represented by a struct, containing the current state and 3 function pointer:
  * - to get the next state
  * - to perform action when changing to the next state
  * - to perform action within a specified state
@@ -26,8 +26,8 @@
  */
 
 typedef FsmState_t (*FsmFunction_GetNextState_t)(FsmState_t current_state);
-typedef void (*FsmFunction_SetNextState_t)(FsmState_t current_state);
-typedef void (*FsmFunction_DoInState_t)();
+typedef void (*FsmFunction_SetNextState_t)(FsmState_t next_state);
+typedef void (*FsmFunction_DoInState_t)(FsmState_t current_state);
 
 typedef struct
 {
