@@ -320,15 +320,12 @@ void system_set_next_state(FsmState_t next_state)
     if (next_state == AM_SCR_12 || next_state == AM_SCR_30)
     {
         scramble_requested = 0; // done servicing
-    }
-
-    if (next_state == T_G || next_state == T_Y || next_state == T_SCR)
-    {
         Logical_Scheduler_Add(toggle_buzzer_task, NULL, 0, MS_TO_SCHEDTICK(500), 0, TOGGLE_BUZZER_TASK_ID);
     }
     else
     {
         Logical_Scheduler_Delete(TOGGLE_BUZZER_TASK_ID);
+        Hardware_Buzzer_Off(&buzzer);
     }
 }
 

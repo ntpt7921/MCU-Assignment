@@ -89,8 +89,8 @@ uint8_t  scramble_requested = 0;
 
 Fsm_t fsm =
 {
-    .current_state = AM_GR,
-    .do_in_state = system_do_in_state,
+    .current_state  = AM_GR,
+    .do_in_state    = system_do_in_state,
     .get_next_state = system_get_next_state,
     .set_next_state = system_set_next_state,
 };
