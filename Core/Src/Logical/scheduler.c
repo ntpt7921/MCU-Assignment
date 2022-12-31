@@ -253,7 +253,8 @@ void Logical_Scheduler_Dispatch()
 }
 
 // increment timestamp (with check and fix overflow)
-static inline void increment_timestamp(uint32_t volatile *ts, uint32_t amount)
+static inline
+void increment_timestamp(uint32_t *ts, uint32_t amount)
 {
     uint32_t limit = UINT32_MAX - amount;
     if (*ts > limit)
@@ -267,7 +268,8 @@ static inline void increment_timestamp(uint32_t volatile *ts, uint32_t amount)
 }
 
 // fix timestamp for all task (runAtTick) and system_tick_count when overflow occur
-static void fix_all_timestamp_overflow()
+static void
+fix_all_timestamp_overflow()
 {
     // find the smallest timestamp
     uint32_t min_ts = system_tick_count;
