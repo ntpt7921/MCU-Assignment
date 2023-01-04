@@ -47,6 +47,8 @@ static uint8_t task_is_running = 0;
 
 // if we need to defer interrupt for updating system_tick_count
 static uint8_t defer_tick_update = 0;
+// increment will cause overflow
+static uint8_t will_overflow = 0;
 // if number of tick deferred
 static uint32_t volatile defer_tick_update_count = 0;
 
@@ -205,10 +207,14 @@ void Logical_Scheduler_Dispatch()
     }
 
     if (defer_tick_update_count > 0)
-    {
-        increment_timestamp(&system_tick_count, defer_tick_update_count);
-        defer_tick_update_count = 0;
-    }
+	{
+		if (will_overflow)
+		{
+			fix_all_timestamp_overflow();
+		}
+		increment_timestamp(&system_tick_count, defer_tick_update_count);
+		defer_tick_update_count = 0;
+	}
     defer_tick_update = 1; // start of critical section
     // search the top of binary heap
     // if found task that is overdue, run it and update task record
@@ -244,6 +250,10 @@ void Logical_Scheduler_Dispatch()
     defer_tick_update = 0; // end of critical section
     if (defer_tick_update_count > 0)
     {
+    	if (will_overflow)
+    	{
+    		fix_all_timestamp_overflow();
+    	}
         increment_timestamp(&system_tick_count, defer_tick_update_count);
         defer_tick_update_count = 0;
     }
@@ -254,12 +264,13 @@ void Logical_Scheduler_Dispatch()
 
 // increment timestamp (with check and fix overflow)
 static inline
-void increment_timestamp(uint32_t *ts, uint32_t amount)
+void increment_timestamp(uint32_t volatile *ts, uint32_t amount)
 {
     uint32_t limit = UINT32_MAX - amount;
     if (*ts > limit)
     {
         defer_tick_update_count += amount;
+        will_overflow = 1;
     }
     else
     {
@@ -289,5 +300,7 @@ fix_all_timestamp_overflow()
 
     // shift the system_tick_count by that amount too
     system_tick_count -= min_ts;
+
+    will_overflow = 0;
 }
 
